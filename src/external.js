@@ -1,0 +1,1 @@
+var anychart = window.anychart || window.window.anychart;
