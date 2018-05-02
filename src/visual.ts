@@ -54,7 +54,7 @@ module powerbi.extensibility.visual {
           for (let rowIndex = 0; rowIndex < totalRows; rowIndex++) {
             let rowDef = {};
             let selectionIdBuilder;
-            dataView.categorical.categories.forEach(categoryColumn => {                
+            dataView.categorical.categories.forEach(categoryColumn => {              
               rowDef[categoryColumn.source.displayName] =
                 categoryColumn.values[rowIndex];
             });
@@ -82,6 +82,7 @@ module powerbi.extensibility.visual {
            
             dataInfo.forEach(info => {
               if(info.roles.Parent){
+                console.log(_.keys(info.roles));
                 parentGroup.push(info.displayName);
               }else{
                 childGroup.push(info.displayName);
@@ -99,13 +100,13 @@ module powerbi.extensibility.visual {
            let startDate=categories[2];
            let endDate=categories[3];
            let formattedData=this.createRowData(options.dataViews[0]);
+           let resultData = _.chain(formattedData)
+           .groupBy(parentGroup[0])
+           .map((children, name) => ({ children, name }))
+           .value();
+           console.log(resultData);
            
-          //  let GroupData = _.chain(formattedData)
-          //  .groupBy(parentGroup[0])
-          //  .pairs()
-          //  .map(function (currentItem) {
-          //      return _.object(_.zip(["color", "users"], currentItem));
-          //  })
+
            
 
            
