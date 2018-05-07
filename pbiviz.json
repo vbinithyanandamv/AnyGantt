@@ -18,11 +18,14 @@
     "icon": "assets/icon.png"
   },
   "externalJS": [
+    "node_modules/lodash/lodash.js",    
+    "node_modules/anychart/dist/js/anychart-core.min.js", 
+    "src/external.js",   
+    "node_modules/anychart/dist/js/anychart-gantt.min.js",
     "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
-    "node_modules/anychart/dist/js/anychart-core.min.js",
-    "node_modules/lodash/lodash.js",
-    "src/external.js",
-    "node_modules/anychart/dist/js/anychart-gantt.min.js"
+    "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+    "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
+    "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js"
   ],
   "style": "style/visual.less",
   "capabilities": "capabilities.json",

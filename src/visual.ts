@@ -26,15 +26,47 @@
 
 module powerbi.extensibility.visual {
     "use strict";
+
+  // powerbi.extensibility.utils.formatting
+  import ValueFormatter = powerbi.extensibility.utils.formatting.valueFormatter;
+  import TextProperties = powerbi.extensibility.utils.formatting.TextProperties;
+  import IValueFormatter = powerbi.extensibility.utils.formatting.IValueFormatter;
+  import textMeasurementService = powerbi.extensibility.utils.formatting.textMeasurementService;
+
+
+
+    
+    export interface Task{
+      id: number | string;
+      name: string;
+      actualStart: String;      
+      actualEnd: String;
+      parent: string;
+      children: string[]; 
+      progressValue: string;     
+  }
+
+    export interface GroupedTask {
+      id: number;
+      name: string;
+      tasks: Task[];
+  }
+  
+    export interface GanttViewModel {
+      dataView: DataView;
+      tasks: Task[];
+      isDurationFilled: boolean;
+  }
+
     export class Visual implements IVisual {
         private target: HTMLElement;
         private updateCount: number;
         private settings: VisualSettings;
         private textNode: Text;
+        private host: IVisualHost;
         
-        
-
         constructor(options: VisualConstructorOptions) {
+            this.host=options.host;
             this.target = options.element;
             this.updateCount = 0;
             if (typeof document !== "undefined") {
@@ -47,31 +79,73 @@ module powerbi.extensibility.visual {
                 // this.target.appendChild(new_p);
             }
         }
-        
-        private createRowData(dataView: DataView) {
-          let rowDefs = [];
-          let totalRows = dataView.categorical.categories[0].values.length;
-          for (let rowIndex = 0; rowIndex < totalRows; rowIndex++) {
-            let rowDef = {};
-            let selectionIdBuilder;
-            dataView.categorical.categories.forEach(categoryColumn => {              
-              rowDef[categoryColumn.source.displayName] =
-                categoryColumn.values[rowIndex];
-            });
-            dataView.categorical.values.forEach(measureColumn => {
-              rowDef[measureColumn.source.displayName] =
-                measureColumn.values[rowIndex];
-            });
 
-            rowDefs.push(rowDef);
-           
+      //   private isValidDate(date: Date): boolean {
+      //     if (Object.prototype.toString.call(date) !== "[object Date]") {
+      //         return false;
+      //     }
+
+      //     return !isNaN(date.getTime());
+      // }
+        
+
+        private createTasks(
+          dataView: DataView,
+          host: IVisualHost): Task[] {
+          let tasks: Task[] = [];
+          const values: GanttColumns<any> = GanttColumns.getCategoricalValues(dataView);
+          const groupValues: GanttColumns<DataViewValueColumn>[] = GanttColumns.getGroupedValueColumns(dataView);
+          if (!values.Task) {
+              return tasks;
           }
-          return rowDefs;
-        }
+          values.Task.forEach((categoryValue: PrimitiveValue, index: number) => {
+            
+            const selectionBuider: ISelectionIdBuilder = host
+                .createSelectionIdBuilder()
+                .withCategory(dataView.categorical.categories[0], index);
+
+            const selectionId: powerbi.extensibility.ISelectionId = selectionBuider.createSelectionId();
+            let parent: string = (values.Parent && values.Parent[index] as string) || null;
+            let startDate= (values.actualStart && values.actualStart[index])
+                || new Date(Date.now());
+            let EndDate= (values.actualEnd && values.actualEnd[index])
+              || new Date(Date.now());
+
+
+            startDate=new Date(startDate.split('/')[2],startDate.split('/')[0]-1,startDate.split('/')[1]);
+            EndDate= new Date(EndDate.split('/')[2],EndDate.split('/')[1],EndDate.split('/')[0]-1);
+
+
+            
+            
+            startDate=Date.UTC(startDate.getFullYear(),startDate.getMonth(),startDate.getDay(),startDate.getHours(),startDate.getMinutes(),startDate.getSeconds());
+            EndDate=Date.UTC(EndDate.getFullYear(),EndDate.getMonth(),EndDate.getDay(),EndDate.getHours(),EndDate.getMinutes(),EndDate.getSeconds());
+            const progressvalue =values.progressValue[index] + '%';
+            
+           
+
+           
+         
+            const task: Task = {
+              id: categoryValue as string,
+              name: categoryValue as string,
+              actualStart: startDate,
+              actualEnd: EndDate,
+              progressValue:progressvalue,
+              parent:null,
+              children: []
+            };
+            
+            tasks.push(task);
+        });
+          
+
+          return tasks;
+        };
+
 
         public update(options: VisualUpdateOptions) {
           //   console.log(options);
-
             let dataViewCategories = options.dataViews[0].categorical.categories;
             let dataViewMeasures = options.dataViews[0].categorical.values;
             let dataInfo=options.dataViews[0].metadata.columns;
@@ -82,7 +156,6 @@ module powerbi.extensibility.visual {
            
             dataInfo.forEach(info => {
               if(info.roles.Parent){
-                console.log(_.keys(info.roles));
                 parentGroup.push(info.displayName);
               }else{
                 childGroup.push(info.displayName);
@@ -95,120 +168,17 @@ module powerbi.extensibility.visual {
             dataViewMeasures.forEach(measure => {
               measureData.push(measure.values);
             });
-           let parent=categories[1];
-           let tasks=categories[0];
-           let startDate=categories[2];
-           let endDate=categories[3];
-           let formattedData=this.createRowData(options.dataViews[0]);
-           let resultData = _.chain(formattedData)
-           .groupBy(parentGroup[0])
-           .map((children, name) => ({ children, name }))
-           .value();
-           console.log(resultData);
+
+          
+           const tasks: Task[] = this.createTasks(options.dataViews[0],this.host);
            
-
-           
-
-           
-        
-          //   let parentArray = categories[0].map( function(x, i){
-          //       return {"name": x, "members": categories[1][i]}        
-          //   }.bind(this));
-
-          //   console.log(parentArray);
-            
-          //   let grouppedArray=_.groupBy(parentArray,'name')
-          //   console.log(grouppedArray);
-          //   console.log(dataViewMeasures);
-          //   let seriesData = [];
-            
-            
-          //   console.log(seriesData);
-
-            // let rowLength = categories.length , columnLength = categories[0].length;
-            // for (var columnIndex = 0; columnIndex < columnLength; columnIndex++) {
-            //     for (var rowIndex = 0; rowIndex < rowLength; rowIndex++) {
-            //         if(xAxisCategories[columnIndex]){
-            //             xAxisCategories[columnIndex] = xAxisCategories[columnIndex] + "/" + categories[rowIndex][columnIndex];                        
-            //         }else{
-            //             xAxisCategories[columnIndex] = categories[rowIndex][columnIndex];
-            //         }
-            //     }                
-            // }
-            // let dataViewMeasures = options.dataViews[0].categorical.values;
-            // 
-            
-
-            // console.log(seriesData);
-
-
-                let rawData = [
-                 {
-                   "name": "Activities",
-                   "actualStart": Date.UTC(2007, 0, 25),
-                   "actualEnd": Date.UTC(2007, 2, 14),
-                   "children": [
-                     {
-                       "name": "Draft plan",
-                       "actualStart": Date.UTC(2007, 0, 25),
-                       "actualEnd": Date.UTC(2007, 1, 3)
-                     },
-                     {
-                       "name": "Board meeting",
-                       "actualStart": Date.UTC(2007, 1, 4),
-                       "actualEnd": Date.UTC(2007, 1, 4)
-                     },
-                     {
-                       "name": "Research option",
-                       "actualStart": Date.UTC(2007, 1, 4),
-                       "actualEnd": Date.UTC(2007, 1, 24)
-                     },
-                     {
-                       "name": "Final plan",
-                       "actualStart": Date.UTC(2007, 1, 24),
-                       "actualEnd": Date.UTC(2007, 2, 14)
-                     }
-                   ]
-                 },
-                 {
-                    "name": "Activities 2",
-                    "actualStart": Date.UTC(2007, 0, 25),
-                    "actualEnd": Date.UTC(2007, 2, 14),
-                    "children": [
-                      {
-                        "name": "Draft plan",
-                        "actualStart": Date.UTC(2007, 0, 25),
-                        "actualEnd": Date.UTC(2007, 1, 3)
-                      },
-                      {
-                        "name": "Board meeting",
-                        "actualStart": Date.UTC(2007, 1, 4),
-                        "actualEnd": Date.UTC(2007, 1, 4)
-                      },
-                      {
-                        "name": "Research option",
-                        "actualStart": Date.UTC(2007, 1, 4),
-                        "actualEnd": Date.UTC(2007, 1, 24)
-                      },
-                      {
-                        "name": "Final plan",
-                        "actualStart": Date.UTC(2007, 1, 24),
-                        "actualEnd": Date.UTC(2007, 2, 14)
-                      }
-                    ]
-                  }];
-
-                 // data tree settings                
-                 let treeData = anychart.data.tree(rawData, "as-tree");
+          
+                 console.log(JSON.stringify(tasks));
+                 // data tree settings              
+                 let treeData = anychart.data.tree(tasks, "as-tree");
                  let chart = anychart.ganttProject();      // chart type
                  chart.data(treeData);                   // chart data
                  chart.container(this.target).draw();      // set container and initiate drawing
-           
-            // this.settings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
-            // console.log('Visual update', options);
-            // if (typeof this.textNode !== "undefined") {
-            //     this.textNode.textContent = (this.updateCount++).toString();
-            // }
         }
 
         private static parseSettings(dataView: DataView): VisualSettings {
