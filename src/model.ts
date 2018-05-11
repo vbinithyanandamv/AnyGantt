@@ -84,9 +84,9 @@ module powerbi.extensibility.visual {
         public Parent: T = null;
         public actualStart: T = null;
         public actualEnd: T = null;
-        public Duration: T = null;
+        public baselineStart: T = null;
+        public baselineEnd: T = null;
         public progressValue: T = null;
         public Resource: T = null;
-        public ExtraInformation: T = null;
     }
 }

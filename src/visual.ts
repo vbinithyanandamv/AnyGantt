@@ -80,13 +80,13 @@ module powerbi.extensibility.visual {
             }
         }
 
-      //   private isValidDate(date: Date): boolean {
-      //     if (Object.prototype.toString.call(date) !== "[object Date]") {
-      //         return false;
-      //     }
+          private isValidDate(date: Date): boolean {
+            if (Object.prototype.toString.call(date) !== "[object Date]") {
+                return false;
+            }
 
-      //     return !isNaN(date.getTime());
-      // }
+            return !isNaN(date.getTime());
+        }
         
 
         private createTasks(
@@ -98,6 +98,10 @@ module powerbi.extensibility.visual {
           if (!values.Task) {
               return tasks;
           }
+          let ParentTree={};
+
+          console.log(values);
+
           values.Task.forEach((categoryValue: PrimitiveValue, index: number) => {
             
             const selectionBuider: ISelectionIdBuilder = host
@@ -112,33 +116,52 @@ module powerbi.extensibility.visual {
               || new Date(Date.now());
 
 
+            //HACKY FIX THIS PLACE NEED TO BE CHANGED IN FUTURE, DATES MUST HAVE TO BE VALIDATED BEFORE PRINTING
             startDate=new Date(startDate.split('/')[2],startDate.split('/')[0]-1,startDate.split('/')[1]);
             EndDate= new Date(EndDate.split('/')[2],EndDate.split('/')[1],EndDate.split('/')[0]-1);
 
-
-            
             
             startDate=Date.UTC(startDate.getFullYear(),startDate.getMonth(),startDate.getDay(),startDate.getHours(),startDate.getMinutes(),startDate.getSeconds());
             EndDate=Date.UTC(EndDate.getFullYear(),EndDate.getMonth(),EndDate.getDay(),EndDate.getHours(),EndDate.getMinutes(),EndDate.getSeconds());
             const progressvalue =values.progressValue[index] + '%';
+                      
+                       
             
-           
-
-           
-         
             const task: Task = {
               id: categoryValue as string,
               name: categoryValue as string,
               actualStart: startDate,
               actualEnd: EndDate,
               progressValue:progressvalue,
-              parent:null,
+              parent:parent,
               children: []
             };
-            
-            tasks.push(task);
-        });
           
+          //if parent is present in the format pane group it
+           if (values.Parent) {
+              if(ParentTree[parent] === undefined){     		
+                ParentTree[parent]={
+                        "name":parent,
+                         "children":[]
+                 };
+                 ParentTree[parent].children.push(task);
+              }else{
+                ParentTree[parent].children.push(task);
+              }
+           }else{
+             tasks.push(task);  //else push the task directly
+           }
+           
+           
+
+        });
+        
+        //parent grouping must be pushed in array for anygantt to render
+        if (values.Parent) {
+          _.forEach(ParentTree, function(value, key) {
+            tasks.push(value);
+          });
+        }
 
           return tasks;
         };
@@ -169,11 +192,9 @@ module powerbi.extensibility.visual {
               measureData.push(measure.values);
             });
 
-          
-           const tasks: Task[] = this.createTasks(options.dataViews[0],this.host);
-           
-          
-                 console.log(JSON.stringify(tasks));
+            
+                const tasks: Task[] = this.createTasks(options.dataViews[0],this.host);
+                console.log(tasks);
                  // data tree settings              
                  let treeData = anychart.data.tree(tasks, "as-tree");
                  let chart = anychart.ganttProject();      // chart type

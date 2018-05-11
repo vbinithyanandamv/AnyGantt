@@ -1,12 +1,6 @@
 {
     "dataRoles": [
         {
-            "name": "Legend",
-            "displayName": "Legend",
-            "displayNameKey": "Role_Legend",
-            "kind": "Grouping"
-        },
-        {
             "name": "Task",
             "displayName": "Task",
             "displayNameKey": "Role_Task",
@@ -25,24 +19,22 @@
             "kind": "Grouping"
         },
         {
+            "name": "baselineStart",
+            "displayName": "Planned Start",
+            "displayNameKey": "Role_StartDate",
+            "kind": "Grouping"
+        },
+        {
             "name": "actualEnd",
             "displayName": "End Date",
             "displayNameKey": "Role_EndDate",
             "kind": "Grouping"
         },
         {
-            "name": "Duration",
-            "displayName": "Duration",
-            "displayNameKey": "Role_Duration",
-            "kind": "Measure",
-            "requiredTypes": [
-                {
-                    "numeric": true
-                },
-                {
-                    "integer": true
-                }
-            ]
+            "name": "baselineEnd",
+            "displayName": "Planned End",
+            "displayNameKey": "Role_StartDate",
+            "kind": "Grouping"
         },
         {
             "name": "progressValue",
@@ -63,22 +55,12 @@
             "displayName": "Resource",
             "displayNameKey": "Role_Resource",
             "kind": "Grouping"
-        },
-        {
-            "name": "ExtraInformation",
-            "displayName": "Tooltips",
-            "displayNameKey": "Role_Tooltips",
-            "kind": "Grouping"
         }
     ],
     "dataViewMappings": [
         {
             "conditions": [
                 {
-                    "Legend": {
-                        "min": 0,
-                        "max": 1
-                    },
                     "Task": {
                         "min": 1,
                         "max": 1
@@ -89,9 +71,17 @@
                     },
                     "actualStart": {
                         "min": 0,
+                        "max": 1
+                    },
+                    "baselineStart":{
+                        "min": 0,
                         "max": 0
                     },
                     "actualEnd": {
+                        "min": 0,
+                        "max": 1
+                    },
+                    "baselineEnd":{
                         "min": 0,
                         "max": 0
                     },
@@ -102,21 +92,9 @@
                     "progressValue": {
                         "min": 0,
                         "max": 0
-                    },
-                    "Resource": {
-                        "min": 0,
-                        "max": 0
-                    },
-                    "ExtraInformation": {
-                        "min": 0,
-                        "max": 3
                     }
                 },
                 {
-                    "Legend": {
-                        "min": 0,
-                        "max": 1
-                    },
                     "Task": {
                         "min": 1,
                         "max": 1
@@ -129,7 +107,15 @@
                         "min": 0,
                         "max": 1
                     },
+                    "baselineStart":{
+                        "min": 0,
+                        "max": 1
+                    },
                     "actualEnd": {
+                        "min": 0,
+                        "max": 1
+                    },
+                    "baselineEnd":{
                         "min": 0,
                         "max": 1
                     },
@@ -140,21 +126,9 @@
                     "Completion": {
                         "min": 0,
                         "max": 0
-                    },
-                    "Resource": {
-                        "min": 0,
-                        "max": 0
-                    },
-                    "ExtraInformation": {
-                        "min": 0,
-                        "max": 3
                     }
                 },
                 {
-                    "Legend": {
-                        "min": 0,
-                        "max": 1
-                    },
                     "Task": {
                         "min": 0,
                         "max": 1
@@ -167,25 +141,21 @@
                         "min": 0,
                         "max": 1
                     },
+                    "baselineStart":{
+                        "min": 0,
+                        "max": 1
+                    },
                     "actualEnd": {
                         "min": 0,
                         "max": 1
                     },
-                    "Duration": {
+                    "baselineEnd":{
                         "min": 0,
                         "max": 1
                     },
                     "progressValue": {
                         "min": 0,
                         "max": 1
-                    },
-                    "Resource": {
-                        "min": 0,
-                        "max": 1
-                    },
-                    "ExtraInformation": {
-                        "min": 0,
-                        "max": 3
                     }
                 }
             ],
@@ -209,17 +179,17 @@
                         },
                         {
                             "for": {
+                                "in": "baselineStart"
+                            }
+                        },
+                        {
+                            "for": {
                                 "in": "actualEnd"
                             }
                         },
                         {
                             "for": {
-                                "in": "Resource"
-                            }
-                        },
-                        {
-                            "for": {
-                                "in": "ExtraInformation"
+                                "in": "baselineEnd"
                             }
                         }
                     ]
