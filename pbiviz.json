@@ -1,1 +1,35 @@
 
+{
+  "visual": {
+    "name": "anygantchange",
+    "displayName": "any",
+    "guid": "anygant4C3653EFFFEB4E7DA5A699CE198391E2",
+    "visualClassName": "Visual",
+    "version": "1.0.0",
+    "description": "",
+    "supportUrl": "",
+    "gitHubUrl": ""
+  },
+  "apiVersion": "1.11.0",
+  "author": {
+    "name": "",
+    "email": ""
+  },
+  "assets": {
+    "icon": "assets/icon.png"
+  },
+  "externalJS": [
+    "node_modules/lodash/lodash.js",    
+    "node_modules/anychart/dist/js/anychart-core.min.js", 
+    "src/external.js",   
+    "node_modules/anychart/dist/js/anychart-gantt.min.js",
+    "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
+    "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+    "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
+    "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js"
+  ],
+  "style": "style/visual.less",
+  "capabilities": "capabilities.json",
+  "dependencies": "dependencies.json",
+  "stringResources": []
+}
